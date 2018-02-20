@@ -1,0 +1,14 @@
+{
+  "name": "images.codeite.net",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon index"
+  },
+  "dependencies": {
+    "express": "^4.16.2",
+    "node-fetch": "^2.0.0",
+    "nodemon": "^1.14.11"
+  }
+}
