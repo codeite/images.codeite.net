@@ -8,6 +8,8 @@ const toPromise = f => (...args) => new Promise((resolve, reject) => f(...args, 
 const readFile = toPromise(fs.readFile)
 const writeFile = toPromise(fs.writeFile)
 
+const cacheDir = process.env.CACHE_DIR_PREFIX || './images'
+
 app.use((req, res, next) => {
   console.log(req.path)
   next()
@@ -23,11 +25,46 @@ const sizes = {
   '$rsp-plp-main-540$': 540,
 }
 
+app.use((req, res, next) => {
+  req.fullHost = req.protocol + '://' + req.get('host');
+  next()
+})
+
+app.get('/', (req, res) => {
+  res.json({
+    image: {
+      path: '/image',
+      url: req.fullHost + '/image'
+    }
+  })
+})
+
+app.get('/image', (req, res) => {
+  res.json({
+    jl: {
+      path: '/image/jl',
+      url: req.fullHost + '/image/jl'
+    }
+  })
+})
+
+app.get('/image/jl', (req, res) => {
+  const query = req.query && '?' + Object.entries(req.query).map(([k, v]) => v ? `${k}=${v}` : k).join('&')
+
+  res.json({
+    query: Object.keys(sizes),
+    ids: images.map(id => ({
+      path: `/image/jl/${id}${query}`,
+      url: req.fullHost +`/image/jl/${id}${query}`
+    }))
+  })
+})
+
 app.get('/image/jl/:id', (req, res) => {
   const {id} = req.params
   const imageArg = Object.keys(req.query).find(x => /^\$.*\$$/.test(x))
   const size = sizes[imageArg] || 1024
-  const filePath = `/images/jl-${id}-${size}px.jpg`
+  const filePath =  `${cacheDir}/jl-${id}-${size}px.jpg`
 
   readFile(filePath)
     .then(file => {
